@@ -1,4 +1,5 @@
 use std::cmp;
+use std::env;
 use std::fs;
 use std::iter::zip;
 
@@ -17,9 +18,14 @@ fn calculate_from_string(input: &str) -> u32 {
         a.push(item_iter.next().unwrap().parse().unwrap());
         b.push(item_iter.next().unwrap().parse().unwrap());
     }
-    return sum_pairs(
-        &pair_arrays( &a, &b )
-    );
+    if env::args().filter(| arg | arg == "-2").count() > 0 {
+        return similarity( &a, &b );
+    } else {
+        return sum_pairs(
+            &pair_arrays( &a, &b )
+        );
+    }
+    
 }
 
 fn pair_arrays(a: &Vec<u32>, b: &Vec<u32>) -> Vec<(u32, u32)> {
@@ -46,6 +52,14 @@ fn sum_pairs(paired: &Vec<(u32, u32)>) -> u32 {
     return differences;
 }
 
+fn similarity(a: &Vec<u32>, b: &Vec<u32>) -> u32 {
+    let total = a
+        .iter()
+        .map(| &val | { val * b.iter().filter(| &other | *other == val).count() as u32 })
+        .sum();
+    return total;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -62,6 +76,13 @@ mod tests {
         let a = vec![1,2,3];
         let b = vec![3,4,1];
         assert_eq!(sum_pairs(&pair_arrays(&a, &b)), 2);
+    }
+
+    #[test]
+    fn test_similarity() {
+        let a = vec![1,2,3];
+        let b = vec![3,4,1];
+        assert_eq!(similarity(&a, &b), 4);
     }
 
     #[test]
